@@ -1,0 +1,7 @@
+- host: luffy
+  roles:
+    - common
+    - plex
+    - news
+    - torrent
+    - nextcloud
