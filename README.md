@@ -1,7 +1,9 @@
-# Introduction
+# Luffy #
+
+## Introduction ##
 This repo is used to deploy the streaming server.
 
-# What to do at first
+## What to do at first ##
 Launch the Bash script to generate and install SSH keys on the target and prepare the Ansible inventory file accordingly.
 The script **prepare_ansible_environment.sh** requires some arguments.
 
@@ -19,5 +21,5 @@ We need to:
   - provide the username used to login
   - provide the full path to the Python3 binary (optional)
 
-# Launch the installation process
+## Launch the deployment process ##
 
