@@ -1,0 +1,52 @@
+- name: set the policy for the INPUT chain to ACCEPT
+  iptables:
+    chain: INPUT
+    policy: ACCEPT
+
+- name: iptables flush filter
+  iptables:
+    chain: INPUT
+    flush: yes
+
+- name: allow all input traffic on loopback
+  iptables:
+    chain: INPUT
+    jump: ACCEPT
+    in_interface: 'lo'
+
+- name: allow related and established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+    in_interface: "{{ ansible_default_ipv4.interface }}"
+
+- name: allow new incoming packets on TCP port
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ item }}"
+    ctstate: NEW
+    syn: match
+    jump: ACCEPT
+    in_interface: "{{ ansible_default_ipv4.interface }}"
+  with_items:
+    - '22'
+    - " {{ deployed_port }}"
+    - '80'
+    - '443'
+  when: deployed_port is defined
+
+- name: set the policy for the INPUT chain to DROP
+  iptables:
+    chain: INPUT
+    policy: DROP
+
+- name: install persistent iptables on Debian like OS
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - netfilter-persistent
+    - iptables-persistent
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'

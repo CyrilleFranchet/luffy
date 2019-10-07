@@ -1,0 +1,25 @@
+---
+- name: create a new user
+  user:
+    name: "{{ deployed_username }}"
+    groups: sudo
+    shell: /bin/bash
+  when: deployed_username is defined
+
+- name: add the SSH key to the new account
+  authorized_key:
+    user: "{{ deployed_username }}"
+    state: present
+    key: "{{ deployed_key }}"
+  when: deployed_username is defined and deployed_key is defined
+
+- name: define sudoers.d configuration for the new account
+  lineinfile:
+    dest: "/etc/sudoers.d/10-{{ deployed_username }}"
+    state: present
+    create: yes
+    line: "{{ deployed_username }} ALL=(ALL) NOPASSWD: ALL"
+    owner: root
+    group: root
+    mode: 0444
+  when: deployed_username is defined

@@ -1,0 +1,48 @@
+---
+- name: disallow root SSH access
+  lineinfile:
+    dest: '/etc/ssh/sshd_config'
+    regexp: "^PermitRootLogin"
+    line: "PermitRootLogin no"
+  notify: restart sshd
+
+- name: disallow PasswordAuthentication SSH access
+  lineinfile:
+    dest: '/etc/ssh/sshd_config'
+    regexp: "^PasswordAuthentication"
+    line: "PasswordAuthentication no"
+  notify: restart sshd
+
+- name: disallow ChallengeResponseAuthentication SSH access
+  lineinfile:
+    dest: '/etc/ssh/sshd_config'
+    regexp: "^ChallengeResponseAuthentication"
+    line: "ChallengeResponseAuthentication no"
+  notify: restart sshd
+
+- name: setup alternate SSH port
+  lineinfile:
+    dest: "/etc/ssh/sshd_config"
+    regexp: "^Port"
+    line: "Port {{ deployed_port }}"
+  notify: restart sshd
+  when: deployed_port is defined
+
+- meta: flush_handlers
+
+- name: switch Ansible context
+  set_fact:
+    ansible_port: "{{ deployed_port }}"
+    ansible_user: "{{ deployed_username }}"
+  when: deployed_port is defined and deployed_username is defined
+
+- name: wait 10 seconds for target connection to become reachable/usable
+  wait_for_connection:
+    timeout: 10
+    
+- name: delete the SSH key of root account
+  authorized_key:
+    user: root
+    state: absent
+    key: "{{ deployed_key }}"
+  when: deployed_username is defined and deployed_key is defined

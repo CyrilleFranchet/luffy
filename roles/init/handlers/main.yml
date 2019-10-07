@@ -1,0 +1,5 @@
+---
+- name: restart sshd
+  shell: "sleep 5 && /etc/init.d/ssh restart"
+  async: 1
+  poll: 0

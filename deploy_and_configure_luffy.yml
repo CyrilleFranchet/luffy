@@ -1,0 +1,2 @@
+- import_playbook: deploy_luffy.yml
+- import_playbook: configure_luffy.yml

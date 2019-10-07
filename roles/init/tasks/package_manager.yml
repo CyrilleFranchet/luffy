@@ -1,0 +1,13 @@
+---
+- name: install system updates for centos systems
+  yum: name=* state=latest update_cache=yes
+  when: ansible_distribution == "CentOS"
+
+- name: install system updates for ubuntu systems
+  apt: upgrade=dist update_cache=yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: install required packages
+  package:
+    name: ['ctop', 'sudo', 'iptables', 'docker.io', 'python3-docker']
+    state: present

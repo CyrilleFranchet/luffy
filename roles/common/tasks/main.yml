@@ -1,0 +1,32 @@
+---
+- name: set configured port fact
+  set_fact:
+    configured_port: "{{ ansible_port }}"
+
+# From localhost, check if we're able to reach {{ inventory_hostname }} on
+# port 22
+- name: check if we're using the default SSH port
+  become: no
+  wait_for:
+    port: "22"
+    state: "started"
+    host: "{{ ansible_host }}"
+    connect_timeout: "5"
+    timeout: "10"
+  delegate_to: "localhost"
+  ignore_errors: "yes"
+  register: default_ssh
+
+# If reachable, continue the following tasks with this port
+- name: set inventory ansible_port and ansible_user to default
+  set_fact:
+    ansible_port: "22"
+    ansible_user: "root"
+  when: default_ssh is defined and default_ssh.state is defined and default_ssh.state == "started"
+  register: ssh_port_set
+
+# Gather facts should be set to false when running this role since it will
+# fail if the Ansible SSH port is not set correctly.
+# We run setup to gather facts here once the SSH port is set up.
+- name: run deferred setup to gather facts
+  setup:
