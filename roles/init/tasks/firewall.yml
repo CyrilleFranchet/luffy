@@ -8,6 +8,12 @@
     chain: INPUT
     flush: yes
 
+- name: iptables flush nat
+  iptables:
+    chain: PREROUTING
+    table: nat
+    flush: yes
+
 - name: allow all input traffic on loopback
   iptables:
     chain: INPUT
@@ -41,6 +47,28 @@
   iptables:
     chain: INPUT
     policy: DROP
+
+- name: forward port 80 to 8080
+  iptables:
+    table: nat
+    chain: PREROUTING
+    in_interface: "{{ ansible_default_ipv4.interface }}"
+    protocol: tcp
+    match: tcp
+    destination_port: '80'
+    jump: REDIRECT
+    to_ports: '8080'
+
+- name: forward port 443 to 4443
+  iptables:
+    table: nat
+    chain: PREROUTING
+    in_interface: "{{ ansible_default_ipv4.interface }}"
+    protocol: tcp
+    match: tcp
+    destination_port: '443'
+    jump: REDIRECT
+    to_ports: '4443'
 
 - name: install persistent iptables on Debian like OS
   package:
